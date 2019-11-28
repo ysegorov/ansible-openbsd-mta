@@ -1,0 +1,22 @@
+---
+
+- name: Install latest OpenBSD binary patches
+  command: syspatch
+  register: res_syspatch
+  changed_when: no
+
+- name: Print syspatch output
+  debug:
+    var: res_syspatch.stdout_lines
+
+- name: Reboot server to load the new kernel
+  reboot:
+  when:
+    - "'reboot' in res_syspatch['stdout']"
+
+- name: Install additional packages
+  openbsd_pkg:
+    name: "{{ packages }}"
+    state: present
+  when:
+    - packages is defined

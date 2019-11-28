@@ -1,0 +1,11 @@
+---
+
+- name: restart smtpd
+  service:
+    name: smtpd
+    state: restarted
+
+- name: rebuild aliases
+  command: "newaliases"
+  notify:
+    - restart smtpd

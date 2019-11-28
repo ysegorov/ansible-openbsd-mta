@@ -1,0 +1,18 @@
+# openbsd-based mta using opensmtpd+dovecot+rspamd
+
+## Prerequisites
+
+- install OpenBSD 6.6
+  * consider creating separate partition under `/var/vmail` folder (for email messages)
+  * add an account to admin the server
+    + make sure it is a member of `wheel` group
+    + make sure account has proper ssh-keys in `~/.ssh/authorized_keys` file to login
+  * configure `sshd` daemon (`/etc/ssh/sshd_config` file)
+    + customize port (optionally, `Port XXXX`)
+    + disable remote login using `root` (`PermitRootLogin no`)
+    + disable password authentication (`PasswordAuthentication no`)
+    + restart sshd daemon (`rcctl restart sshd`)
+  * configure `doas` (`/etc/doas.conf`)
+    + add rule to permit `wheel` group members to execute commands as `root` user
+      (`permit nopass :wheel`)
+  * install python (`pkg_add python-3.7.4`)

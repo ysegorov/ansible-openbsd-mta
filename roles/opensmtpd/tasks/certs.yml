@@ -1,0 +1,53 @@
+---
+
+- name: Check if private key for OpenSMTPD already exists
+  stat:
+    path: "{{ private_key_path }}"
+  register: mta_privkey_stat
+
+- name: Check if certificate fullchain file for OpenSMTPD already exists
+  stat:
+    path: "{{ cert_fullchain_path }}"
+  register: mta_fullchain_stat
+
+- name: Copy httpd.conf configuration file
+  template:
+    src: httpd.conf.j2
+    dest: /etc/httpd.conf
+    mode: 0644
+    owner: root
+    group: wheel
+  when: not mta_privkey_stat.stat.exists or not mta_fullchain_stat.stat.exists
+
+- name: Start httpd service
+  service:
+    name: httpd
+    state: started
+  when: not mta_privkey_stat.stat.exists or not mta_fullchain_stat.stat.exists
+
+- name: Copy acme-client.conf configuration file
+  template:
+    src: acme-client.conf.j2
+    dest: /etc/acme-client.conf
+    mode: 0644
+    owner: root
+    group: wheel
+  when: not mta_privkey_stat.stat.exists or not mta_fullchain_stat.stat.exists
+
+# - name: Run acme-client to get certificate
+#   command: "acme-client -v {{ mta_hostname }}"
+#   when: not mta_privkey_stat.stat.exists or not mta_fullchain_stat.stat.exists
+
+- name: Stop httpd service
+  service:
+    name: httpd
+    state: stopped
+  when: not mta_privkey_stat.stat.exists or not mta_fullchain_stat.stat.exists
+
+- name: Configure crontab entry to autoupdate certificate for OpenSMTPD
+  cron:
+    name: "update opensmtpd certificate"
+    minute: "12"
+    hour: "4"
+    job: "rcctl start httpd && acme-client {{ mta_hostname }} && rcctl stop httpd"
+    state: present

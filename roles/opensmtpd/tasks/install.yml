@@ -1,0 +1,6 @@
+---
+
+- name: Install OpenSMTPD extras
+  openbsd_pkg:
+    name: "{{ opensmtpd_packages }}"
+    state: present

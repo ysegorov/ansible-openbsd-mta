@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+server "{{ mta_hostname }}" {
+        listen on * port 80
+        location "/.well-known/acme-challenge/*" {
+                root "/acme"
+                request strip 2
+        }
+        location * {
+                block return 400
+        }
+}

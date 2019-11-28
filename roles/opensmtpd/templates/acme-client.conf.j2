@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+
+#
+# $OpenBSD: acme-client.conf,v 1.2 2019/06/07 08:08:30 florian Exp $
+#
+authority letsencrypt {
+    api url "https://acme-v02.api.letsencrypt.org/directory"
+    account key "/etc/acme/letsencrypt-privkey.pem"
+}
+
+authority letsencrypt-staging {
+    api url "https://acme-staging-v02.api.letsencrypt.org/directory"
+    account key "/etc/acme/letsencrypt-staging-privkey.pem"
+}
+
+domain {{ mta_hostname }} {
+    domain key "{{ private_key_path }}"
+    domain full chain certificate "{{ cert_fullchain_path }}"
+    sign with letsencrypt
+}

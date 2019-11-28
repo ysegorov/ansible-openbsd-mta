@@ -1,0 +1,55 @@
+---
+
+- name: Install Rspamd
+  openbsd_pkg:
+    name: "{{ rspamd_packages }}"
+    state: present
+
+- name: Ensure directory to store dkim keys esists
+  file:
+    path: "{{ dkim_path }}"
+    state: directory
+    mode: "{{ dkim_path_mode }}"
+    owner: "{{ dkim_path_owner }}"
+    group: "{{ dkim_path_group }}"
+
+- name: Generate dkim keys for domains
+  include_tasks: dkim.yml
+  vars:
+    domain: "{{ item.domain }}"
+  loop: "{{ vmail }}"
+
+- name: Ensure local.d configuration directory esists
+  file:
+    path: "/etc/rspamd/local.d"
+    state: directory
+    mode: 0755
+    owner: "root"
+    group: "wheel"
+
+- name: Copy redis.conf configuration file
+  template:
+    src: redis.conf.j2
+    dest: /etc/rspamd/local.d/redis.conf
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart rspamd
+
+- name: Copy dkim_signing.conf configuration file
+  template:
+    src: dkim_signing.conf.j2
+    dest: /etc/rspamd/local.d/dkim_signing.conf
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart rspamd
+
+- name: Ensure Rspamd is started and enabled
+  service:
+    name: rspamd
+    state: started
+    enabled: yes
+

@@ -1,0 +1,32 @@
+---
+
+- name: Configure root account email alias
+  lineinfile:
+    path: /etc/mail/aliases
+    state: present
+    line: "root: {{ postmaster }}"
+    regexp: "^root"
+  notify:
+    - rebuild aliases
+
+- name: Add virtual mail user account
+  user:
+    name: "{{ vmail_username }}"
+    group: "{{ vmail_group }}"
+    shell: "/sbin/nologin"
+    home: "{{ vmail_path }}"
+    create_home: no
+  register: vmail_user
+
+- name: Ensure home directory for virtual mail user account exists
+  file:
+    path: "{{ vmail_path }}"
+    state: directory
+    mode: "{{ vmail_path_mode }}"
+    owner: "{{ vmail_username }}"
+    group: "{{ vmail_group }}"
+
+
+- name: debug vmail user
+  debug:
+    var: vmail_user

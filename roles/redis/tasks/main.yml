@@ -1,0 +1,12 @@
+---
+
+- name: Install Redis
+  openbsd_pkg:
+    name: redis
+    state: present
+
+- name: Ensure Redis is started and enabled
+  service:
+    name: redis
+    state: started
+    enabled: yes

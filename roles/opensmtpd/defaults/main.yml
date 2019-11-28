@@ -1,0 +1,18 @@
+---
+
+opensmtpd_packages:
+  - opensmtpd-extras
+  - opensmtpd-extras-redis
+  - opensmtpd-filter-senderscore
+
+mta_hostname: "{{ hostname|default(ansible_facts.fqdn) }}"
+
+private_key_path: "/etc/ssl/private/{{ mta_hostname }}.key"
+cert_fullchain_path: "/etc/ssl/{{ mta_hostname }}.fullchain.pem"
+
+vmail_username: vmail
+vmail_group: vmail
+vmail_path: /var/vmail
+vmail_path_mode: 0700
+
+vmail_redis_db: 1

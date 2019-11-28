@@ -1,0 +1,29 @@
+---
+
+- hosts: mta
+  become: yes
+  vars_files:
+    - "./config.yml"
+  pre_tasks:
+    - name: Ensure we have at least one domain to configure mta for
+      assert:
+        that:
+          - vmail is defined
+          - "vmail|length > 0"
+        fail_msg: "you must configure at least one domain, please check readme for instructions"
+    - name: Ensure we have postmaster email configured
+      assert:
+        that:
+          - postmaster is defined
+        fail_msg: "you must configure postmaster email, please check readme for instructions"
+    - name: Ensure we work with OpenBSD server
+      assert:
+        that:
+          - ansible_facts['distribution'] == 'OpenBSD'
+          - ansible_facts['distribution_version'] == '6.6'
+        fail_msg: "supported OS is OpenBSD 6.6 only at the moment"
+  roles:
+    - base
+    - redis
+    - rspamd
+    - opensmtpd
