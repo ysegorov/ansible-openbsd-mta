@@ -1,0 +1,18 @@
+---
+
+- name: Set alias {{ valias.email }} facts
+  set_fact:
+    alias_email: "{{ valias.email }}"
+    alias_dest: "{{ valias.dest }}"
+    alias_state: "{{ valias.state|default('present') }}"
+
+- name: Add alias {{ alias_email }} if needed
+  command: "redis-cli -n {{ vmail_redis_db }} sadd aliases:{{ alias_email }} {{ alias_dest }}"
+  when:
+    - domain_state == 'present'
+    - alias_state == 'present'
+
+- name: Remove alias {{ alias_email }} if needed
+  command: "redis-cli -n {{ vmail_redis_db }} srem aliases:{{ alias_email }} {{ alias_dest }}"
+  when:
+    - domain_state == 'absent' or alias_state == 'absent'

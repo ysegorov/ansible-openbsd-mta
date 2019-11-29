@@ -1,0 +1,43 @@
+---
+
+- name: "===== {{ vdomain.domain }} configuration ======"
+  set_fact:
+    domain_name: "{{ vdomain.domain }}"
+    domain_state: "{{ vdomain.state|default('present') }}"
+    domain_postmaster: "{{ vdomain.postmaster|default(postmaster) }}"
+    domain_aliases: "{{ vdomain.aliases|default([]) }}"
+    domain_users: "{{ vdomain.users|default([]) }}"
+
+- name: Add domain {{ domain_name }} to domains table if needed
+  command: "redis-cli -n {{ vmail_redis_db }} sadd domains {{ domain_name }}"
+  when:
+    - domain_state == 'present'
+
+- name: Remove domain {{ domain_name }} from domains table if needed
+  command: "redis-cli -n {{ vmail_redis_db }} srem domains {{ domain_name }}"
+  when:
+    - domain_state == 'absent'
+
+- name: Load system aliases for {{ domain_name }}
+  include_tasks: vmail_alias.yml
+  loop:
+    - email: "postmaster@{{ domain_name }}"
+      dest: "{{ domain_postmaster }}"
+      state: present
+    - email: "abuse@{{ domain_name }}"
+      dest: "{{ domain_postmaster }}"
+      state: present
+  loop_control:
+    loop_var: valias
+
+- name: Load additional aliases for {{ domain_name }}
+  include_tasks: vmail_alias.yml
+  loop: "{{ domain_aliases }}"
+  loop_control:
+    loop_var: valias
+
+- name: Load users for {{ domain_name }}
+  include_tasks: vmail_user.yml
+  loop: "{{ domain_users }}"
+  loop_control:
+    loop_var: vuser

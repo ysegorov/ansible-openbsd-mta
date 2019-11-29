@@ -26,6 +26,12 @@
     owner: "{{ vmail_username }}"
     group: "{{ vmail_group }}"
 
+- name: Load single domain data
+  include_tasks: vmail_domain.yml
+  loop: "{{ vmail }}"
+  loop_control:
+    loop_var: vdomain
+
 
 - name: debug vmail user
   debug:

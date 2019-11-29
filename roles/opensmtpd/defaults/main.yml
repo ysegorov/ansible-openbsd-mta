@@ -10,6 +10,9 @@ mta_hostname: "{{ hostname|default(ansible_facts.fqdn) }}"
 private_key_path: "/etc/ssl/private/{{ mta_hostname }}.key"
 cert_fullchain_path: "/etc/ssl/{{ mta_hostname }}.fullchain.pem"
 
+# NB. allowed values: drop or junk
+spam_handling: drop
+
 vmail_username: vmail
 vmail_group: vmail
 vmail_path: /var/vmail
