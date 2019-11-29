@@ -1,0 +1,21 @@
+---
+
+- name: Copy redis.conf configuration file for OpenSMTPD
+  template:
+    src: redis.conf.j2
+    dest: /etc/mail/redis.conf
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart smtpd
+
+- name: Copy smtpd.conf configuration file for OpenSMTPD
+  template:
+    src: smtpd.conf.j2
+    dest: /etc/mail/smtpd.conf
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart smtpd

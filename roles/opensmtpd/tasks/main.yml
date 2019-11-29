@@ -1,11 +1,9 @@
 ---
 
-- name: debug
-  debug:
-    var: hostname
-
 - include_tasks: install.yml
 
 - include_tasks: certs.yml
 
 - include_tasks: vmail.yml
+
+- include_tasks: configure.yml

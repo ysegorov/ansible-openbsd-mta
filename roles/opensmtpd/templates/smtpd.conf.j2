@@ -1,0 +1,34 @@
+pki {{ mta_hostname }} cert "{{ cert_fullchain_path }}"
+pki {{ mta_hostname }} key "{{ private_key_path }}"
+
+{% if spam_handling == 'drop' %}
+filter check_dyndns phase connect match rdns regex { '.*\.dyn\..*', '.*\.dsl\..*' } disconnect "550 no residential connections"
+filter check_rdns phase connect match !rdns disconnect "550 no rDNS is so 80s"
+filter check_fcrdns phase connect match !fcrdns disconnect "550 no FCrDNS is so 80s"
+filter senderscore proc-exec "filter-senderscore -blockBelow 10 -junkBelow 70 -slowFactor 5000"
+{% else %}
+filter check_dyndns phase connect match rdns regex { '.*\.dyn\..*', '.*\.dsl\..*' } junk
+filter check_rdns phase connect match !rdns junk
+filter check_fcrdns phase connect match !fcrdns junk
+filter senderscore proc-exec "filter-senderscore -junkBelow 70 -slowFactor 5000"
+{% endif %}
+
+filter rspamd proc-exec "filter-rspamd"
+
+table aliases file:/etc/mail/aliases
+table vmail redis:/etc/mail/redis.conf
+
+listen on all tls pki {{ mta_hostname }} filter { check_dyndns, check_rdns, check_fcrdns, senderscore, rspamd }
+
+listen on all port submission tls-require pki {{ mta_hostname }} auth <vmail> filter rspamd
+
+action "local_mail" maildir junk alias <aliases>
+action "virtual_mail" maildir junk userbase <vmail> alias <vmail>
+action "outbound" relay helo {{ mta_hostname }}
+
+match from any for domain <vmail> action "virtual_mail"
+match for local action "local_mail"
+
+match from any auth for any action "outbound"
+match for any action "outbound"
+

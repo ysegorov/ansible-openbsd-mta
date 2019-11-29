@@ -31,8 +31,3 @@
   loop: "{{ vmail }}"
   loop_control:
     loop_var: vdomain
-
-
-- name: debug vmail user
-  debug:
-    var: vmail_user
