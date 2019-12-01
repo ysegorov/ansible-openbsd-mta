@@ -7,8 +7,8 @@ opensmtpd_packages:
 
 mta_hostname: "{{ hostname|default(ansible_facts.fqdn) }}"
 
-private_key_path: "/etc/ssl/private/{{ mta_hostname }}.key"
-cert_fullchain_path: "/etc/ssl/{{ mta_hostname }}.fullchain.pem"
+mta_private_key_path: "/etc/ssl/private/{{ mta_hostname }}.key"
+mta_cert_fullchain_path: "/etc/ssl/{{ mta_hostname }}.fullchain.pem"
 
 # NB. allowed values: drop or junk
 spam_handling: drop

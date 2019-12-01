@@ -2,12 +2,12 @@
 
 - name: Check if private key for OpenSMTPD already exists
   stat:
-    path: "{{ private_key_path }}"
+    path: "{{ mta_private_key_path }}"
   register: mta_privkey_stat
 
 - name: Check if certificate fullchain file for OpenSMTPD already exists
   stat:
-    path: "{{ cert_fullchain_path }}"
+    path: "{{ mta_cert_fullchain_path }}"
   register: mta_fullchain_stat
 
 - name: Copy httpd.conf configuration file

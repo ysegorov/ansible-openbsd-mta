@@ -1,0 +1,47 @@
+---
+
+- name: Install Dovecot
+  openbsd_pkg:
+    name: "{{ dovecot_packages }}"
+    state: present
+
+- name: Update login.conf for Dovecot
+  blockinfile:
+    path: /etc/login.conf
+    marker_begin: "BEGIN DOVECOT"
+    marker_end: "END DOVECOT"
+    block: |
+      dovecot:\
+        :openfiles-cur=1024:\
+        :openfiles-max=2048:\
+        :tc=daemon:
+
+- name: Update ssl configuration for Dovecot
+  lineinfile:
+    path: /etc/dovecot/conf.d/10-ssl.conf
+    state: present
+    line: "{{ item.key }} = <{{ item.value }}"
+    regexp: "^{{ item.key }}"
+  loop:
+    - key: ssl_cert
+      value: "{{ mta_cert_fullchain_path }}"
+    - key: ssl_key
+      value: "{{ mta_private_key_path }}"
+  notify:
+    - restart dovecot
+
+- name: Update mailbox configuration for Dovecot
+  lineinfile:
+    path: /etc/dovecot/conf.d/10-mail.conf
+    state: present
+    line: "mail_location = maildir:~/Maildir"
+    regexp: "^mail_location"
+    insertafter: "^#mail_location"
+  notify:
+    - restart dovecot
+
+- name: Ensure Dovecot is started and enabled
+  service:
+    name: dovecot
+    state: started
+    enabled: yes

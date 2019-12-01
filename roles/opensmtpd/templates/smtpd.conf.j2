@@ -1,5 +1,5 @@
-pki {{ mta_hostname }} cert "{{ cert_fullchain_path }}"
-pki {{ mta_hostname }} key "{{ private_key_path }}"
+pki {{ mta_hostname }} cert "{{ mta_cert_fullchain_path }}"
+pki {{ mta_hostname }} key "{{ mta_private_key_path }}"
 
 {% if spam_handling == 'drop' %}
 filter check_dyndns phase connect match rdns regex { '.*\.dyn\..*', '.*\.dsl\..*' } disconnect "550 no residential connections"

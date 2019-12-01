@@ -14,7 +14,7 @@ authority letsencrypt-staging {
 }
 
 domain {{ mta_hostname }} {
-    domain key "{{ private_key_path }}"
-    domain full chain certificate "{{ cert_fullchain_path }}"
+    domain key "{{ mta_private_key_path }}"
+    domain full chain certificate "{{ mta_cert_fullchain_path }}"
     sign with letsencrypt
 }
