@@ -10,12 +10,13 @@
     user_uid: "{{ vmail_user.uid }}"
     user_gid: "{{ vmail_user.group }}"
     user_state: "{{ vuser.state|default('present') }}"
+    user_uuid: "{{ vuser.email|to_uuid }}"
 
 - name: Encrypt password for {{ user_email }} if needed
   shell:
     cmd: encrypt -p
     stdin: "{{ user_password }}\n"
-  register: generated_password
+  register: encrypted_password
   when:
     - not user_encrypted_password
     - domain_state == 'present'
@@ -23,7 +24,7 @@
 
 - name: Set encrypted password fact for {{ user_email }} if needed
   set_fact:
-    user_encrypted_password: "{{ generated_password.stdout|trim }}"
+    user_encrypted_password: "{{ encrypted_password.stdout|trim }}"
   when:
     - not user_encrypted_password
     - domain_state == 'present'
@@ -52,7 +53,7 @@
     - domain_state == 'absent' or user_state == 'absent'
 
 - name: Add {{ user_email }} userinfo record if needed
-  command: "redis-cli -n {{ vmail_redis_db }} hset user:{{ user_email }} uid {{ user_uid }} gid {{ user_gid }} maildir {{ user_maildir }} login {{ user_email }} passwd {{ user_encrypted_password }} uuid {{ user_email|to_uuid }}"
+  command: "redis-cli -n {{ vmail_redis_db }} hset user:{{ user_email }} uid {{ user_uid }} gid {{ user_gid }} maildir {{ user_maildir }} login {{ user_email }} passwd {{ user_encrypted_password }} uuid {{ user_uuid }}"
   when:
     - domain_state == 'present'
     - user_state == 'present'
