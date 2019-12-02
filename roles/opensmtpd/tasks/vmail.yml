@@ -26,8 +26,32 @@
     owner: "{{ vmail_username }}"
     group: "{{ vmail_group }}"
 
-- name: Load single domain data
-  include_tasks: vmail_domain.yml
-  loop: "{{ vmail }}"
-  loop_control:
-    loop_var: vdomain
+- name: Copy vmail.sql script to load virtual users
+  template:
+    src: vmail.sql.j2
+    dest: /etc/mail/vmail.sql
+    mode: 0640
+    owner: root
+    group: wheel
+
+- name: Create new sqlite3 database file containing virtual users
+  shell: "sqlite3 {{ vmail_sqlite_db_path }}.ng </etc/mail/vmail.sql"
+
+- name: Update sqlite3 database file containing virtual users
+  copy:
+    src: "{{ vmail_sqlite_db_path }}.ng"
+    dest: "{{ vmail_sqlite_db_path }}"
+    remote_src: yes
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart smtpd
+
+- name: Remove temporary files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/etc/mail/vmail.sql"
+    - "{{ vmail_sqlite_db_path }}.ng"

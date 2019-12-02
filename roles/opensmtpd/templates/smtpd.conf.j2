@@ -16,7 +16,7 @@ filter senderscore proc-exec "filter-senderscore -junkBelow 70 -slowFactor 5000"
 filter rspamd proc-exec "filter-rspamd"
 
 table aliases file:/etc/mail/aliases
-table vmail redis:/etc/mail/redis.conf
+table vmail sqlite:/etc/mail/sqlite.conf
 
 listen on all tls pki {{ mta_hostname }} filter { check_dyndns, check_rdns, check_fcrdns, senderscore, rspamd }
 

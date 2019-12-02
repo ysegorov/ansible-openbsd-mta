@@ -1,9 +1,9 @@
 ---
 
-- name: Copy redis.conf configuration file for OpenSMTPD
+- name: Copy sqlite.conf configuration file for OpenSMTPD
   template:
-    src: redis.conf.j2
-    dest: /etc/mail/redis.conf
+    src: sqlite.conf.j2
+    dest: /etc/mail/sqlite.conf
     mode: 0644
     owner: root
     group: wheel

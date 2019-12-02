@@ -1,9 +1,0 @@
-
-master 127.0.0.1
-database {{ vmail_redis_db }}
-
-query_domain SISMEMBER domains %s
-query_userinfo HMGET user:%s uid gid maildir
-query_credentials HMGET user:%s login passwd
-query_alias SMEMBERS aliases:%s
-query_mailaddr SISMEMBER mailaddr %s

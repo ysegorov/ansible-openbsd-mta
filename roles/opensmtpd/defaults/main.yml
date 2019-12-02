@@ -18,4 +18,4 @@ vmail_group: vmail
 vmail_path: /var/vmail
 vmail_path_mode: 0700
 
-vmail_redis_db: 1
+vmail_sqlite_db_path: /etc/mail/vmail.db

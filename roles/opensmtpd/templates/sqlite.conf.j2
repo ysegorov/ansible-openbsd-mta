@@ -1,0 +1,6 @@
+dbpath {{ vmail_sqlite_db_path }}
+
+query_domain SELECT domain FROM domains WHERE domain=?;
+query_alias SELECT destination FROM aliases WHERE email=?;
+query_credentials SELECT email, password FROM users WHERE email=?;
+query_userinfo SELECT uid, gid, home FROM users WHERE email=?;
