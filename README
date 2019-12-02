@@ -2,6 +2,10 @@
 
 ## Prerequisites
 
+- prepare host (pc to run playbook) software
+  * install ansible
+  * install python-passlib
+
 - install OpenBSD 6.6
   * consider creating separate partition under `/var/vmail` folder (for email messages)
   * add an account to admin the server
