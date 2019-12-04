@@ -40,6 +40,75 @@
   notify:
     - restart dovecot
 
+- name: Copy dovecot-sqlite.conf.ext configuration file
+  template:
+    src: dovecot-sqlite.conf.ext.j2
+    dest: /etc/dovecot/dovecot-sqlite.conf.ext
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart dovecot
+
+- name: Copy auth-sqlite.conf.ext configuration file
+  template:
+    src: auth-sqlite.conf.ext.j2
+    dest: /etc/dovecot/conf.d/auth-sqlite.conf.ext
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart dovecot
+
+- name: Update auth configuration file for Dovecot
+  lineinfile:
+    path: /etc/dovecot/conf.d/10-auth.conf
+    state: present
+    line: "!include auth-sqlite.conf.ext"
+    regexp: "auth-sqlite\\.conf\\.ext$"
+  notify:
+    - restart dovecot
+
+- name: Copy local.conf configuration file for Dovecot
+  template:
+    src: dovecot-local.conf.j2
+    dest: /etc/dovecot/local.conf
+    mode: 0644
+    owner: root
+    group: wheel
+  notify:
+    - restart dovecot
+
+- name: Copy sieve scripts for Dovecot
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/lib/dovecot/sieve/
+    mode: 0644
+    owner: root
+    group: wheel
+  loop:
+    - report-ham.sieve
+    - report-spam.sieve
+
+- name: Copy shell scripts to be used from sieve scripts
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/lib/dovecot/sieve/
+    mode: 0755
+    owner: root
+    group: wheel
+  loop:
+    - learn-ham.sh
+    - learn-spam.sh
+
+- name: Compile sieve scripts
+  command: "sievec {{ item }}"
+  args:
+    chdir: /usr/local/lib/dovecot/sieve/
+  loop:
+    - report-ham.sieve
+    - report-spam.sieve
+
 - name: Ensure Dovecot is started and enabled
   service:
     name: dovecot

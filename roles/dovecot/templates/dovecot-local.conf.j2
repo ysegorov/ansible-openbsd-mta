@@ -1,0 +1,75 @@
+# {{ ansible_managed }}
+
+# see /etc/dovecot/dovecot.conf
+protocols = imap{% if dovecot_pop3 %} pop3{% endif %}
+
+# see /etc/dovecot/conf.d/10-ssl.conf
+ssl = required
+
+# see /etc/dovecot/conf.d/10-master.conf
+service imap-login {
+  inet_listener imaps {
+    port = 993
+  }
+  inet_listener imap {
+    port = 0
+  }
+}
+
+service pop3-login {
+  inet_listener pop3s {
+    port = {% if dovecot_pop3 %}995{% else %}0
+{% endif %}
+  }
+  inet_listener pop3 {
+    port = 0
+  }
+}
+
+service submission-login {
+  inet_listener submission {
+    port = 0
+  }
+}
+
+# see /etc/dovecot/conf.d/10-mail.conf
+# see /etc/dovecot/conf.d/15-mailboxes.conf
+namespace inbox {
+  mailbox Drafts {
+    special_use = \Drafts
+  }
+  mailbox Junk {
+    special_use = \Junk
+  }
+  mailbox Trash {
+    special_use = \Trash
+  }
+  mailbox Sent {
+    special_use = \Sent
+  }
+  mailbox Archive {
+    special_use = \Archive
+  }
+}
+
+# see /etc/dovecot/conf.d/20-imap.conf
+protocol imap {
+  mail_plugins = $mail_plugins imap_sieve
+}
+
+# see /etc/dovecot/conf.d/90-plugin.conf
+plugin {
+  sieve_plugins = sieve_imapsieve sieve_extprograms
+  sieve_global_extensions = +vnd.dovecot.pipe +vnd.dovecot.environment
+
+  imapsieve_mailbox1_name = Junk
+  imapsieve_mailbox1_causes = COPY
+  imapsieve_mailbox1_before = file:/usr/local/lib/dovecot/sieve/report-spam.sieve
+
+  imapsieve_mailbox2_name = *
+  imapsieve_mailbox2_from = Junk
+  imapsieve_mailbox2_causes = COPY
+  imapsieve_mailbox2_before = file:/usr/local/lib/dovecot/sieve/report-ham.sieve
+
+  sieve_pipe_bin_dir = /usr/local/lib/dovecot/sieve
+}

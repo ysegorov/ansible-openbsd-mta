@@ -2,3 +2,6 @@
 
 dovecot_packages:
   - dovecot
+  - dovecot-pigeonhole
+
+dovecot_pop3: no
