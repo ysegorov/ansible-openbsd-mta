@@ -1,0 +1,40 @@
+# {{ ansible_managed }}
+# see https://www.openbsd.org/faq/pf/example1.html
+#
+# See pf.conf(5) and /etc/examples/pf.conf
+
+
+table <martians> { 0.0.0.0/8 10.0.0.0/8 127.0.0.0/8 169.254.0.0/16     \
+           172.16.0.0/12 192.0.0.0/24 192.0.2.0/24 224.0.0.0/3 \
+           192.168.0.0/16 198.18.0.0/15 198.51.100.0/24        \
+           203.0.113.0/24 }
+
+tcp_ports_in = "{ www https smtp submission imaps{% if dovecot_pop3 %} pop3s{% endif %} {{ ansible_port }} }"
+tcp_ports_out = "{ www https smtp domain }"
+udp_ports = "{ domain ntp }"
+
+set block-policy drop
+set debug err
+set loginterface egress
+set optimization normal
+set state-policy if-bound
+set syncookies adaptive
+
+set skip on lo
+
+match in all scrub (no-df random-id max-mss 1440)
+
+block all
+block in quick from no-route to any
+block in quick from urpf-failed to any
+
+pass quick on egress inet proto icmp all icmp-type 8 code 0
+
+pass out quick on egress inet proto tcp from egress to any port $tcp_ports_out modulate state
+pass out quick on egress inet proto udp from egress to any port $udp_ports keep state
+
+pass in quick on egress inet proto tcp from any to egress port $tcp_ports_in modulate state
+
+block in quick on egress from <martians> to any
+block in quick on egress from any to 255.255.255.255
+block return out quick on egress from any to <martians>

@@ -34,3 +34,6 @@
     - role: dovecot
       tags:
         - dovecot
+    - role: firewall
+      tags:
+        - firewall
